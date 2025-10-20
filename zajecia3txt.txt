@@ -1,0 +1,19 @@
+-- 1. Stwórz w PhpMyAdmin użytkownika student z hasłem student123, który może logować się tylko z localhost.
+
+CREATE USER 'student'@'localhost' IDENTIFIED BY 'student123';
+
+-- 2 Przyznaj użytkownikowi student prawo wykonywania operacji SELECT i INSERT na bazie danych biblioteka.
+GRANT SELECT, INSERT ON biblioteka.* TO 'student'@'localhost';
+
+-- 3Odebrać użytkownikowi student prawo do INSERT w bazie biblioteka.
+REVOKE INSERT ON biblioteka.* FROM 'student'@'localhost';
+
+-- 4Wyświetl listę wszystkich uprawnień użytkownika student w MySQL i zanotuj wynik.
+SHOW GRANTS FOR 'student'@'localhost';
+
+-- 5Utwórz użytkownika tester, który ma prawo tylko do odczytu (SELECT) z tabeli uzytkownicy w bazie firma.
+CREATE USER 'tester'@'localhost' IDENTIFIED BY 'tester123';
+GRANT SELECT ON firma.uzytkownicy TO 'tester'@'localhost';
+
+-- 6 Usuń z serwera użytkownika tester.
+DROP USER 'tester'@'localhost';

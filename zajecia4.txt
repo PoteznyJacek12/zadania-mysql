@@ -1,0 +1,41 @@
+-- 1
+SELECT klienci.imie, klienci.nazwisko, klienci.miasto
+FROM klienci
+WHERE klienci.miasto LIKE 'warszawa';
+-- 2
+SELECT *
+FROM produkty
+WHERE cena < 1000;
+-- 3
+SELECT klienci.nazwisko
+FROM klienci
+WHERE klienci.nazwisko LIKE 'k%';
+-- 4
+SELECT zamowienia.status
+FROM zamowienia
+WHERE zamowienia.status LIKE 'anulowane';
+-- 5
+SELECT *
+from produkty
+WHERE cena BETWEEN 200 AND 800 ;
+-- 6
+SELECT *
+FROM zamowienia
+WHERE zamowienia.data_zamowienia LIKE '2025-01%';
+-- 7
+SELECT klienci.imie, klienci.nazwisko, klienci.email
+FROM klienci
+WHERE klienci.email LIKE '%@example.com';
+-- 8
+SELECT produkty.id_produktu, produkty.nazwa, produkty.id_kategorii
+FROM produkty
+JOIN kategorie ON kategorie.id_kategorii= produkty.id_kategorii
+WHERE produkty.id_kategorii = '2' OR '5' ;
+-- 9
+SELECT platnosci.metoda
+FROM platnosci
+WHERE platnosci.metoda like 'karta';
+-- 10
+SELECT produkty.nazwa, produkty.cena
+FROM produkty
+WHERE produkty.cena <= 500;

@@ -1,0 +1,107 @@
+-- 1 Wyświetl wszystkich klientów wraz z ich adresem e-mail oraz miastem zamieszkania (JOIN osoby, emaile, adresy).
+SELECT osoby.imie, osoby.nazwisko, emaile.email, adresy.miasto
+FROM osoby
+JOIN emaile ON osoby.id_osoby = emaile.id_osoby
+JOIN adresy ON osoby.id_osoby = adresy.id_osoby;
+
+
+-- 2Lista zamówień powyżej 2000 zł – imię, nazwisko klienta, produkt, kwota.
+
+SELECT osoby.imie, osoby.nazwisko, zamowienia.produkt, zamowienia.kwota
+FROM osoby
+JOIN zamowienia ON osoby.id_osoby = zamowienia.id_osoby
+WHERE zamowienia.kwota > 2000;
+
+
+-- 3 Oblicz średnią wartość zamówień w całej tabeli zamowienia.
+
+SELECT AVG(zamowienia.kwota) AS sredniaKwota
+FROM zamowienia;
+
+
+
+-- 4 Policz ile osób mieszka w każdym mieście – wyświetl miasto i liczbę mieszkańców (GROUP BY).
+
+SELECT adresy.miasto, COUNT(*) AS Suma
+FROM adresy
+GROUP BY adresy.miasto;
+
+
+-- 5 Znajdź klientów, którzy nie mają żadnego zamówienia (LEFT JOIN + filtr IS NULL).
+
+SELECT osoby.imie, osoby.nazwisko ,zamowienia.id_zamowienia
+FROM osoby
+LEFT JOIN zamowienia ON osoby.id_osoby = zamowienia.id_osoby
+WHERE zamowienia.id_zamowienia IS NULL;
+
+
+-- 6Pokaż 3 osoby z największą sumą zamówień – imię, nazwisko, suma zamówień (ORDER BY SUM DESC LIMIT 3).
+SELECT osoby.imie, osoby.nazwisko, SUM(zamowienia.kwota) AS sumazamowien
+FROM osoby
+JOIN zamowienia ON osoby.id_osoby = zamowienia.id_osoby
+GROUP BY osoby.id_osoby
+ORDER BY sumazamowien DESC
+
+LIMIT 3;
+
+
+-- 7Wyświetl osoby, które złożyły więcej niż 1 zamówienie – imię, nazwisko, liczba zamówień (GROUP BY + HAVING).
+
+SELECT osoby.imie, osoby.nazwisko, COUNT(zamowienia.id_zamowienia) AS sumazamowien
+FROM osoby
+JOIN zamowienia ON osoby.id_osoby = zamowienia.id_osoby
+GROUP BY osoby.id_osoby
+HAVING sumazamowien > 1;
+
+
+-- ZESTAW 2
+
+
+-- 1 Wyświetl osoby, które złożyły zamówienia w roku 2024 (JOIN + warunek na rok YEAR).
+
+SELECT osoby.imie, osoby.nazwisko , zamowienia.data_zamowienia
+FROM osoby
+JOIN zamowienia ON osoby.id_osoby = zamowienia.id_osoby
+WHERE YEAR(zamowienia.data_zamowienia) = 2024;
+
+-- 2Wyświetl wszystkie adresy email i przypisane do nich osoby (RIGHT JOIN);
+SELECT emaile.email, osoby.imie, osoby.nazwisko
+FROM osoby
+RIGHT JOIN emaile ON osoby.id_osoby = emaile.id_osoby;
+
+
+-- 3 Wyświetl wszystkie numery telefonów i właścicieli (jeśli są przypisani) (RIGHT JOIN).
+SELECT telefony.numer, osoby.imie, osoby.nazwisko
+FROM osoby
+RIGHT JOIN telefony ON osoby.id_osoby = telefony.id_osoby;
+
+
+-- 4 -- 4 Wyświetl imię, nazwisko, miasto, telefon, email oraz ostatnie zamówienie klienta. (JOIN)
+
+SELECT osoby.imie, osoby.nazwisko, adresy.miasto, telefony.numer, emaile.email
+FROM osoby
+LEFT JOIN adresy ON osoby.id_osoby = adresy.id_osoby
+LEFT JOIN telefony ON osoby.id_osoby = telefony.id_osoby
+LEFT JOIN emaile ON osoby.id_osoby = emaile.id_osoby
+LEFT JOIN zamowienia ON osoby.id_osoby = zamowienia.id_osoby
+GROUP BY osoby.id_osoby;
+
+
+-- 5Wyświetl wszystkie zamówienia z miastem i ulicą klienta (LEFT JOIN).
+
+
+SELECT osoby.imie, osoby.nazwisko, zamowienia.produkt, zamowienia.kwota, adresy.miasto, adresy.ulica
+FROM zamowienia
+LEFT JOIN osoby ON zamowienia.id_osoby = osoby.id_osoby
+LEFT JOIN adresy ON osoby.id_osoby = adresy.id_osoby;
+
+--6
+-- W6yświetl osoby, które nie mają przypisanego adresu email (LEFT JOIN + filtr IS NULL).
+SELECT osoby.imie, osoby.nazwisko
+FROM osoby
+LEFT JOIN emaile ON osoby.id_osoby = emaile.id_osoby
+WHERE emaile.email IS NULL
+GROUP BY osoby.imie;
+
+
+
