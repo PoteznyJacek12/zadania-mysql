@@ -1,0 +1,54 @@
+-- Używając złączeń napisz podzapytanie zwracające pełen adres: adres, okręg, miasto, kod pocztowy i kraj klienta a następnie na podstawie tego podzapytania wyfiltruj wszystkie adresy, których kraj to Poland.
+
+SELECT adres.adres, adres.okreg,miasto.miasto, adres.kod_pocztowy, kraj.kraj
+FROM adres
+JOIN miasto ON adres.miasto_id=miasto.miasto_id
+JOIN kraj ON kraj.kraj_id=miasto.kraj_id
+WHERE kraj ='Poland';
+
+-- Napisz podzapytanie zwracające adresy z okręgu Texas, a następnie używając tego podzapytania wyświetl listę klientów z tego okręgu.
+SELECT *
+FROM (
+    SELECT adres.okreg ,adres.adres,klient.imie,klient.nazwisko
+    FROM adres
+    JOIN klient ON adres.adres_id=klient.adres_id
+    WHERE adres.okreg='Texas') AS lista;
+
+-- Używając złączeń napisz podzapytanie zwracające pełen adres: adres, okręg, miasto, kod pocztowy i kraj klienta a następnie na podstawie tego podzapytania wyfiltruj wszystkie adresy, których kraj to Poland.
+
+SELECT *
+FROM (
+    SELECT adres.adres, adres.okreg,miasto.miasto, adres.kod_pocztowy, kraj.kraj 
+    FROM adres
+    JOIN miasto ON adres.miasto_id=miasto.miasto_id
+    JOIN kraj ON kraj.kraj_id=miasto.kraj_id) AS adres
+WHERE kraj ='Poland';
+
+
+-- -- Na podstawie danych z poprzedniego zadania napisz zapytanie zwracające sumę kwot klientów z miasta London.
+
+
+
+SELECT SUM(platnosc.kwota),platnosc.klient_id
+FROM platnosc
+WHERE platnosc.klient_id IN (
+
+
+
+
+
+        SELECT klient.klient_id
+        FROM klient
+        WHERE klient.adres_id IN (
+
+
+            SELECT adres.adres_id
+            FROM adres 
+            WHERE adres.miasto_id IN
+                (SELECT miasto.miasto_id
+                FROM miasto
+                WHERE miasto ="London")))
+GROUP BY platnosc.klient_id;
+
+
+
