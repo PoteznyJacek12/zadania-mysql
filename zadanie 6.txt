@@ -1,0 +1,138 @@
+-- apisz zapytanie zwracające liczbę filmów w tabeli film pogrupowanych według pola ocena.
+SELECT film.ocena, COUNT(*) AS liczba_filmow
+FROM film
+GROUP BY film.ocena;
+
+-- Używając złączenia filmu z kategorią napisz zapytanie zwracające liczbę filmów w każdej kategorii.
+
+SELECT kategoria.nazwa, COUNT(*) AS liczba_filmow
+FROM film
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON film_kategoria.kategoria_id = kategoria.kategoria_id
+GROUP BY kategoria.nazwa;
+
+-- Używając złączenia tabeli film z film_aktor napisz zapytanie zwracające liczbę aktorów grających w każdym filmie.
+SELECT film.tytul, COUNT(*) AS liczba_aktorow
+FROM film
+JOIN film_aktor ON film.film_id = film_aktor.film_id
+GROUP BY film.tytul;
+
+-- Używając złączenia tabeli platnosc z klient oblicz sumę wszystkich płatności poszczególnych klientów.
+SELECT platnosc.klient_id, SUM(platnosc.kwota) AS suma_platnosci
+FROM platnosc
+GROUP BY platnosc.klient_id;
+
+-- Używając złączenia tabel platnosc, wypozyczenie, spis i film oblicz sumę wszystkich płatności za film poszczególne filmy.
+SELECT film.tytul, SUM(platnosc.kwota) AS suma_platnosci
+FROM platnosc
+JOIN wypozyczenie ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON spis.film_id = film.film_id
+GROUP BY film.tytul;
+
+-- Używając złączenia tabel film_kategoria, kategoria i film oblicz średnia stawkę wypożyczenia i średni koszt wymiany filmu w każdej kategorii.
+SELECT kategoria.nazwa,
+       AVG(film.stawka_wypozycz) AS srednia_cena_wypozyczenia,
+       AVG(film.koszty_wymiany) AS sredni_koszt_wymiany
+FROM film
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON film_kategoria.kategoria_id = kategoria.kategoria_id
+GROUP BY kategoria.nazwa;
+
+-- Używając złączenia tabeli platnosc z klient oblicz średnie kwoty płatności dla poszczególnych klientów.
+
+SELECT platnosc.klient_id,
+       AVG(platnosc.kwota) AS srednia_kwota
+FROM platnosc
+GROUP BY platnosc.klient_id;
+
+-- Używając złączenia tabeli platnosc z pracownik oblicz średnie kwoty wypożyczenia filmów poszczególnych pracowników.
+SELECT platnosc.pracownik_id,
+       AVG(platnosc.kwota) AS srednia_kwota
+FROM platnosc
+GROUP BY platnosc.pracownik_id;
+
+-- Na podstawie danych w tabelach adres, sklep, pracownik, platnosc oblicz średnie kwoty sprzedaży filmów dla poszczególnych adresów sklepów.
+SELECT adres.adres,
+       AVG(platnosc.kwota) AS srednia_kwota
+FROM adres
+JOIN sklep ON adres.adres_id = sklep.adres_id
+JOIN pracownik ON sklep.sklep_id = pracownik.sklep_id
+JOIN platnosc ON pracownik.pracownik_id = platnosc.pracownik_id
+GROUP BY adres.adres;
+
+-- Na podstawie danych z tabeli platnosc oblicz: średnią, maksymalną, minimalną płatność oraz sumę wszystkich płatności dla poszczególnych kategorii.
+SELECT kategoria.nazwa,
+       AVG(platnosc.kwota) AS srednia,
+       MAX(platnosc.kwota) AS maks,
+       MIN(platnosc.kwota) AS min,
+       SUM(platnosc.kwota) AS suma
+FROM platnosc
+JOIN wypozyczenie ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON spis.film_id = film.film_id
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON film_kategoria.kategoria_id = kategoria.kategoria_id
+GROUP BY kategoria.nazwa;
+
+-- Oblicz: sumę, maksymalną i minimalną kwotę płatności (z tabeli platnosc) dla poszczególnych klientów.
+SELECT platnosc.klient_id,
+       SUM(platnosc.kwota) AS suma,
+       MAX(platnosc.kwota) AS maks,
+       MIN(platnosc.kwota) AS min
+FROM platnosc
+GROUP BY platnosc.klient_id;
+
+-- Używając złączeń tabel: wypozyczenie i klient wypisz nazwiska klientów oraz ilości wypożyczonych przez nich filmów
+SELECT klient.nazwisko,
+       COUNT(wypozyczenie.wypozyczenie_id) AS liczba_wypozyczen
+FROM klient
+JOIN wypozyczenie ON klient.klient_id = wypozyczenie.klient_id
+GROUP BY klient.nazwisko;
+
+-- Napisz zapytanie zwracające ilość płatności dokonanych przez poszczególnych klientów. Porównaj wynik z wynikiem z zadania 12.
+SELECT platnosc.klient_id,
+       COUNT(platnosc.platnosc_id) AS liczba_platnosci
+FROM platnosc
+GROUP BY platnosc.klient_id;
+
+
+-- Na podstawie danych z tabeli platnosc oblicz wariancję, wariancję próby, średnią i odchylenie standardowe wszystkich płatności poszczególnych filmów.
+SELECT film.tytul,
+       VARIANCE(platnosc.kwota) AS wariancja,
+       AVG(platnosc.kwota) AS srednia,
+       STDDEV(platnosc.kwota) AS odchylenie_standardowe
+FROM platnosc
+JOIN wypozyczenie ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON spis.film_id = film.film_id
+GROUP BY film.tytul;
+
+-- Na podstawie danych z tabeli platnosc oblicz wariancję, wariancję próby, średnią i odchylenie standardowe wszystkich płatności dla filmów z poszczególnych kategorii.
+SELECT kategoria.nazwa,
+       VARIANCE(platnosc.kwota) AS wariancja,
+       AVG(platnosc.kwota) AS srednia,
+       STDDEV(platnosc.kwota) AS odchylenie_standardowe
+FROM platnosc
+JOIN wypozyczenie ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON spis.film_id = film.film_id
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON film_kategoria.kategoria_id = kategoria.kategoria_id
+GROUP BY kategoria.nazwa;
+
+-- Używając złączenia tabel platnosc i klient oraz klauzuli HAVING napisz zapytanie zwracające listę klientów wraz z płatnościami, których suma kwot płatności była większa od 200.
+SELECT platnosc.klient_id,SUM(platnosc.kwota) AS suma_platnosci
+FROM platnosc
+GROUP BY platnosc.klient_id
+HAVING SUM(platnosc.kwota) > 200;
+
+-- Używając złączenia tabel platnosc, wypozyczenie, spis, film oraz klauzuli HAVING napisz zapytanie zwracające listę filmów wraz z płatnościami, których suma kwot płatności była większa od 200.
+SELECT film.tytul,
+       SUM(platnosc.kwota) AS suma_platnosci
+FROM platnosc
+JOIN wypozyczenie ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON spis.film_id = film.film_id
+GROUP BY film.tytul
+HAVING SUM(platnosc.kwota) > 200;

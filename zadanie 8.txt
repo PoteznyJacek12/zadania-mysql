@@ -1,0 +1,304 @@
+-- zad 1
+SELECT *
+FROM (
+    SELECT adres.adres, adres.okreg, miasto.miasto, adres.kod_pocztowy, kraj.kraj
+    FROM adres
+    JOIN miasto ON adres.miasto_id = miasto.miasto_id
+    JOIN kraj ON miasto.kraj_id = kraj.kraj_id
+) AS pelne_adresy
+WHERE kraj = 'Poland';
+
+-- zad2
+SELECT *
+FROM (
+    SELECT klient.klient_id, klient.imie, klient.nazwisko, adres.adres, adres.okreg
+    FROM klient
+    JOIN adres ON klient.adres_id = adres.adres_id
+    WHERE adres.okreg = 'Texas'
+) AS klienci_z_texas;
+
+-- 3
+SELECT *
+FROM (
+    SELECT adres.adres, adres.okreg, miasto.miasto, adres.kod_pocztowy, kraj.kraj 
+    FROM adres
+    JOIN miasto ON adres.miasto_id = miasto.miasto_id
+    JOIN kraj ON miasto.kraj_id = kraj.kraj_id
+) AS adresy
+WHERE kraj ='Poland';
+
+-- 4
+SELECT SUM(platnosc.kwota), platnosc.klient_id
+FROM platnosc
+WHERE platnosc.klient_id IN (
+    SELECT klient.klient_id
+    FROM klient
+    WHERE klient.adres_id IN (
+        SELECT adres.adres_id
+        FROM adres
+        WHERE adres.miasto_id IN (
+            SELECT miasto.miasto_id
+            FROM miasto
+            WHERE miasto.miasto = 'London'
+        )
+    )
+)
+GROUP BY platnosc.klient_id;
+
+
+-- 5
+SELECT miasto_id, COUNT(*) AS ile
+FROM adres
+GROUP BY miasto_id;
+
+-- 6
+SELECT miasto_id
+FROM (
+    SELECT miasto_id, COUNT(*) AS ile
+    FROM adres
+    GROUP BY miasto_id
+    HAVING COUNT(*) > 1
+) AS pod;
+
+-- 7
+SELECT miasto.miasto, pod.ile
+FROM (
+    SELECT miasto_id, COUNT(*) AS ile
+    FROM adres
+    GROUP BY miasto_id
+    HAVING COUNT(*) > 1
+) AS pod
+JOIN miasto ON miasto.miasto_id = pod.miasto_id;
+
+-- 8
+SELECT miasto.miasto, SUM(platnosc.kwota)
+FROM platnosc
+JOIN klient ON platnosc.klient_id = klient.klient_id
+JOIN adres ON klient.adres_id = adres.adres_id
+JOIN miasto ON adres.miasto_id = miasto.miasto_id
+WHERE adres.miasto_id IN (
+    SELECT miasto_id
+    FROM adres
+    GROUP BY miasto_id
+    HAVING COUNT(*) > 1
+)
+GROUP BY miasto.miasto;
+
+-- 9
+SELECT aktor.aktor_id, aktor.imie, aktor.nazwisko, COUNT(film_aktor.film_id)
+FROM aktor
+JOIN film_aktor ON aktor.aktor_id = film_aktor.aktor_id
+GROUP BY aktor.aktor_id, aktor.imie, aktor.nazwisko
+HAVING COUNT(film_aktor.film_id) > 20;
+
+-- Z10
+SELECT film.film_id, film.tytul
+FROM film
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+WHERE kategoria.nazwa = 'Action' OR kategoria.nazwa = 'Akcja';
+
+
+-- ZAD11
+SELECT kraj.kraj, COUNT(klient.klient_id)
+FROM klient
+JOIN adres ON klient.adres_id = adres.adres_id
+JOIN miasto ON adres.miasto_id = miasto.miasto_id
+JOIN kraj ON miasto.kraj_id = kraj.kraj_id
+GROUP BY kraj.kraj
+HAVING COUNT(klient.klient_id) > 10;
+
+-- Z12
+SELECT film.film_id, film.tytul, COUNT(wypozyczenie.wypozyczenie_id)
+FROM film
+JOIN spis ON film.film_id = spis.film_id
+JOIN wypozyczenie ON spis.spis_id = wypozyczenie.spis_id
+GROUP BY film.film_id, film.tytul
+HAVING COUNT(wypozyczenie.wypozyczenie_id) > 10;
+
+-- 13
+SELECT film.film_id, film.tytul, SUM(platnosc.kwota)
+FROM film
+JOIN spis ON film.film_id = spis.film_id
+JOIN wypozyczenie ON spis.spis_id = wypozyczenie.spis_id
+JOIN platnosc ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+GROUP BY film.film_id, film.tytul
+HAVING COUNT(wypozyczenie.wypozyczenie_id) > 10;
+
+-- 14
+SELECT kategoria.nazwa, COUNT(film_kategoria.film_id)
+FROM kategoria
+LEFT JOIN film_kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+GROUP BY kategoria.nazwa;
+
+-- 15
+SELECT kategoria.nazwa, SUM(platnosc.kwota)
+FROM kategoria
+JOIN film_kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+JOIN film ON film.film_id = film_kategoria.film_id
+JOIN spis ON film.film_id = spis.film_id
+JOIN wypozyczenie ON spis.spis_id = wypozyczenie.spis_id
+JOIN platnosc ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+GROUP BY kategoria.nazwa;
+
+
+-- 16
+SELECT kraj.kraj, kategoria.nazwa, COUNT(DISTINCT film.film_id)
+FROM kraj
+JOIN miasto ON kraj.kraj_id = miasto.kraj_id
+JOIN adres ON miasto.miasto_id = adres.miasto_id
+JOIN sklep ON adres.adres_id = sklep.adres_id
+JOIN spis ON sklep.sklep_id = spis.sklep_id
+JOIN film ON film.film_id = spis.film_id
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+GROUP BY kraj.kraj, kategoria.nazwa;
+
+-- 17
+SELECT kraj.kraj, kategoria.nazwa, SUM(platnosc.kwota)
+FROM kraj
+JOIN miasto ON kraj.kraj_id = miasto.kraj_id
+JOIN adres ON miasto.miasto_id = adres.miasto_id
+JOIN sklep ON adres.adres_id = sklep.adres_id
+JOIN spis ON sklep.sklep_id = spis.sklep_id
+JOIN film ON film.film_id = spis.film_id
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+JOIN wypozyczenie ON wypozyczenie.spis_id = spis.spis_id
+JOIN platnosc ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+GROUP BY kraj.kraj, kategoria.nazwa;
+
+-- 18
+SELECT kraj.kraj, CONCAT(adres.adres, ', ', miasto.miasto), COUNT(wypozyczenie.wypozyczenie_id)
+FROM kraj
+JOIN miasto ON kraj.kraj_id = miasto.kraj_id
+JOIN adres ON miasto.miasto_id = adres.miasto_id
+JOIN sklep ON adres.adres_id = sklep.adres_id
+JOIN spis ON sklep.sklep_id = spis.sklep_id
+LEFT JOIN wypozyczenie ON wypozyczenie.spis_id = spis.spis_id
+GROUP BY kraj.kraj, adres.adres, miasto.miasto;
+
+-- zad 19
+SELECT kraj.kraj, CONCAT(adres.adres, ', ', miasto.miasto), SUM(platnosc.kwota)
+FROM kraj
+JOIN miasto ON kraj.kraj_id = miasto.kraj_id
+JOIN adres ON miasto.miasto_id = adres.miasto_id
+JOIN sklep ON adres.adres_id = sklep.adres_id
+JOIN spis ON sklep.sklep_id = spis.sklep_id
+JOIN wypozyczenie ON wypozyczenie.spis_id = spis.spis_id
+JOIN platnosc ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+GROUP BY kraj.kraj, adres.adres, miasto.miasto;
+
+-- zad 20
+SELECT kategoria.nazwa, SUM(film.dlugosc)
+FROM kategoria
+JOIN film_kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+JOIN film ON film.film_id = film_kategoria.film_id
+GROUP BY kategoria.nazwa;
+
+
+-- Zad 21
+SELECT klient.imie, klient.nazwisko, aktor.imie, aktor.nazwisko, COUNT(wypozyczenie.wypozyczenie_id)
+FROM klient
+JOIN wypozyczenie ON wypozyczenie.klient_id = klient.klient_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON film.film_id = spis.film_id
+JOIN film_aktor ON film_aktor.film_id = film.film_id
+JOIN aktor ON aktor.aktor_id = film_aktor.aktor_id
+GROUP BY klient.imie, klient.nazwisko, aktor.imie, aktor.nazwisko;
+
+-- ZADAN22
+SELECT klient.imie, klient.nazwisko, film.ocena, COUNT(wypozyczenie.wypozyczenie_id)
+FROM klient
+JOIN wypozyczenie ON wypozyczenie.klient_id = klient.klient_id
+JOIN spis ON wypozyczenie.spis_id = spis.spis_id
+JOIN film ON film.film_id = spis.film_id
+GROUP BY klient.imie, klient.nazwisko, film.ocena;
+
+-- zadanie 23
+CREATE TABLE film_akcja LIKE film;
+INSERT INTO film_akcja
+SELECT film.*
+FROM film
+JOIN film_kategoria ON film.film_id = film_kategoria.film_id
+JOIN kategoria ON kategoria.kategoria_id = film_kategoria.kategoria_id
+WHERE kategoria.nazwa = 'Action' OR kategoria.nazwa = 'Akcja';
+
+-- ZAadanie 24
+UPDATE film_akcja
+SET koszty_wymiany = koszty_wymiany * 1.10
+WHERE koszty_wymiany < (SELECT AVG(koszty_wymiany) FROM film_akcja);
+
+-- ZADANIE 25
+UPDATE film_akcja
+SET stawka_wypozycz = stawka_wypozycz * 1.10
+WHERE dlugosc > 120;
+
+
+-- zadanie 26
+UPDATE film_akcja
+JOIN film_aktor ON film_akcja.film_id = film_aktor.film_id
+JOIN aktor ON aktor.aktor_id = film_aktor.aktor_id
+SET film_akcja.stawka_wypozycz = film_akcja.stawka_wypozycz * 0.80
+WHERE (aktor.imie = 'JOHNNY' AND aktor.nazwisko = 'LOLLOBRIGIDA')
+   OR (aktor.imie = 'ZERO' AND aktor.nazwisko = 'CAGE');
+
+-- ZADdanie 27
+UPDATE film_akcja
+SET stawka_wypozycz = stawka_wypozycz * 1.20
+WHERE film_id IN (
+    SELECT film_id FROM (
+        SELECT film.film_id, SUM(platnosc.kwota) AS suma_kwot
+        FROM film
+        JOIN spis ON film.film_id = spis.film_id
+        JOIN wypozyczenie ON spis.spis_id = wypozyczenie.spis_id
+        JOIN platnosc ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+        GROUP BY film.film_id
+        HAVING SUM(platnosc.kwota) > (
+            SELECT AVG(suma_kwot)
+            FROM (
+                SELECT SUM(platnosc.kwota) AS suma_kwot
+                FROM film
+                JOIN spis ON film.film_id = spis.film_id
+                JOIN wypozyczenie ON spis.spis_id = wypozyczenie.spis_id
+                JOIN platnosc ON platnosc.wypozyczenie_id = wypozyczenie.wypozyczenie_id
+                GROUP BY film.film_id
+            ) AS t
+        )
+    ) AS x
+);
+
+-- ZADANIE 28
+DELETE FROM film_akcja
+WHERE film_id IN (
+    SELECT film_id FROM film_aktor
+    JOIN aktor ON aktor.aktor_id = film_aktor.aktor_id
+    WHERE aktor.imie = 'PENELOPE' AND aktor.nazwisko = 'GUINESS'
+);
+
+-- ZADANIE 29
+DELETE FROM film_akcja
+WHERE film_id IN (
+    SELECT film_id FROM (
+        SELECT film.film_id, COUNT(wypozyczenie.wypozyczenie_id) AS ile
+        FROM film
+        JOIN spis ON film.film_id = spis.film_id
+        JOIN wypozyczenie ON wypozyczenie.spis_id = spis.spis_id
+        GROUP BY film.film_id
+        HAVING COUNT(wypozyczenie.wypozyczenie_id) < 3
+    ) AS t
+);
+
+
+-- ZADANIE 30
+DELETE FROM film_akcja
+WHERE opis LIKE '%Epic%';
+
+-- ZADANIE 31
+DELETE FROM film_akcja
+WHERE ocena IN ('NC-17', 'PG');
+
+-- ZADANIE 32
+DROP TABLE IF EXISTS film_akcja;
+
+
